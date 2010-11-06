@@ -1,0 +1,156 @@
+
+<project name="quercus-modules" default="all" basedir=".">
+
+    <property name="javac.verbose" value="off"/>
+    <property name="javac.debug" value="on"/>
+    <property name="javac.optimize" value="off"/>
+    <property name="javac.deprecation" value="off"/>
+    <property name="javac.nowarn" value="on"/>
+    <property name="javac.memoryMaximumSize" value="512m"/>
+
+    <property name="javac.source" value="1.5"/>
+    <property name="javac.target" value="1.5"/>
+
+    <property name="jar.compress" value="false"/>
+    <property name="jar.update" value="true"/>
+
+    <property name="maven.lib" location="maven-lib"/>
+    <property name="build" location="build"/>
+
+    <property name="lib" location="lib"/>
+
+    <target name="tstamp">
+	<tstamp/>
+	<tstamp>
+	    <format property="date" pattern="EEE, dd MMM yyyy hh:mm:ss zzz"/>
+	</tstamp>
+	<tstamp>
+	    <format property="vdate" pattern="yyyyMMdd'T'hhmmss"/>
+	</tstamp>
+	<tstamp>
+	    <format property="snapshotdate" pattern="yyMMdd"/>
+	</tstamp>
+    </target>
+
+    <target name="init" depends="tstamp">
+	<property name="product" value="Quercus"/>
+	<property name="shortproduct" value="quercus"/>
+
+	<condition property="maven.version" value="${version}">
+	    <isset property="version"/>
+	</condition>
+	<property name="maven.version" value="4.0-SNAPSHOT"/>
+
+	<condition property="maven.metadata.template" value="release">
+	    <isset property="version"/>
+	</condition>
+	<property name="maven.metadata.template" value="snapshot"/>
+
+	<condition property="maven.m2" value="m2">
+	    <isset property="version"/>
+	</condition>
+	<property name="maven.m2" value="m2-snapshot"/>
+	<property name="maven.root" value="dist/${maven.m2}"/>
+
+	<property name="version" value="4.0.s${snapshotdate}"/>
+	<property name="dist.name" value="${shortproduct}-${version}"/>
+
+	<mkdir dir="${build}"/>
+	<mkdir dir="${build}/webapps"/>
+	<mkdir dir="${build}/ext-webapp-lib"/>
+	<mkdir dir="${build}/plugins"/>
+	<mkdir dir="${maven.lib}"/>
+
+	<condition property="unix">
+	    <os family="unix"/>
+	</condition>
+    </target>
+
+    <target name="module">
+	<property name="module.src" value="${module.name}/src"/>
+	<property name="module.build" value="${module.name}/classes"/>
+	<property name="module.dist" value="${module.name}/dist"/>
+	<property name="module.jar" value="quercus-${module.name}.jar"/>
+
+	<property file="${module.src}/module.properties"/>
+
+	<mkdir dir="${module.build}" />
+
+	<copy todir="${module.build}"
+          preservelastmodified="true"
+          overwrite="true">
+	    <fileset dir="${module.src}">
+		<include name="**/*.afm"/>
+		<include name="**/*.ftld"/>
+		<include name="**/*.php"/>
+		<include name="**/*.properties"/>
+		<include name="**/*.rnc"/>
+		<include name="**/*.tld"/>
+		<include name="**/*.xml"/>
+		<include name="**/*.xsl"/>
+		<include name="**/jaxb.index"/>
+		<include name="**/namespace"/>
+		<include name="META-INF/**"/>
+	    </fileset>
+	</copy>
+
+	<javac srcdir="${module.src}" destdir="${module.build}"
+           fork="true"
+           verbose="${javac.verbose}"
+           debug="${javac.debug}" optimize="${javac.optimize}"
+           deprecation="${javac.deprecation}" nowarn="${javac.nowarn}"
+           source="${javac.source}"
+           target="${javac.target}"
+           excludes="**/.svn/**"
+           memoryMaximumSize="${javac.memoryMaximumSize}">
+	    <classpath>
+		<dirset dir=".">
+		    <include name="*/classes"/>
+		</dirset>
+		<fileset dir="ext">
+		    <include name="**/*.jar"/>
+		</fileset>
+		<fileset dir="${maven.lib}">
+		    <include name="**/*.jar"/>
+		</fileset>
+	    </classpath>
+	</javac>
+
+	<mkdir dir="${module.dist}" />
+
+	<jar jarfile="${module.dist}/${module.jar}"
+         compress="${jar.compress}" index="${jar.index}" update="${jar.update}"
+         manifest="${module.src}/manifest">
+	    <fileset dir="${module.build}">
+		<exclude name=".cvsignore"/>
+		<exclude name=".svnignore"/>
+	    </fileset>
+	</jar>
+    </target>
+
+    <target name="all" depends="pdflib"></target>
+
+    <target name="pdflib" depends="init">
+	<antcall target="module" inheritRefs="true">
+	    <param name="module.name" value="pdflib"/>
+	    <param name="module.dist" value="${lib}"/>
+	</antcall>
+    </target>
+
+    <target name="clean" depends="init">
+	<delete>
+	    <fileset dir=".">
+		<include name="*/classes/**"/>
+		<include name="*/dist/**"/>
+	    </fileset>
+	</delete>
+	<delete>
+	    <fileset dir=".">
+		<include name="**/*.class"/>
+	    </fileset>
+	</delete>
+	<delete dir="${build}"/>
+	<delete dir="${lib}"/>
+	<delete dir="${maven.lib}"/>
+    </target>
+</project>
