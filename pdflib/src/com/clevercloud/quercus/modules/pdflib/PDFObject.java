@@ -26,7 +26,6 @@
  *
  * @author Scott Ferguson
  */
-
 package com.clevercloud.quercus.modules.pdflib;
 
 import java.io.IOException;
@@ -35,14 +34,15 @@ import java.io.IOException;
  * A pdf object.
  */
 abstract public class PDFObject {
-  /**
-   * Returns the object id.
-   */
-  abstract public int getId();
 
-  /**
-   * Writes the object to the stream
-   */
-  abstract public void writeObject(PDFWriter out)
-    throws IOException;
+    /**
+     * Returns the object id.
+     */
+    abstract public int getId();
+
+    /**
+     * Writes the object to the stream
+     */
+    abstract public void writeObject(PDFWriter out)
+	    throws IOException;
 }

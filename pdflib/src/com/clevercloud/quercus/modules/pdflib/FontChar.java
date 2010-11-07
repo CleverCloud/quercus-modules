@@ -26,29 +26,26 @@
  *
  * @author Scott Ferguson
  */
-
 package com.clevercloud.quercus.modules.pdflib;
 
 /**
  * font character
  */
 public class FontChar {
-  private final int _code;
-  private final double _width;
 
-  FontChar(int code, double width)
-  {
-    _code = code;
-    _width = width;
-  }
+    private final int _code;
+    private final double _width;
 
-  public int getCode()
-  {
-    return _code;
-  }
+    FontChar(int code, double width) {
+	_code = code;
+	_width = width;
+    }
 
-  public double getWidth()
-  {
-    return _width;
-  }
+    public int getCode() {
+	return _code;
+    }
+
+    public double getWidth() {
+	return _width;
+    }
 }

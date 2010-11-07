@@ -26,7 +26,6 @@
  *
  * @author Scott Ferguson
  */
-
 package com.clevercloud.quercus.modules.pdflib;
 
 import com.caucho.util.L10N;
@@ -38,112 +37,95 @@ import java.util.logging.Logger;
  * pdf object oriented API facade
  */
 public class PDFFont extends PDFObject {
-  private static final Logger log
-    = Logger.getLogger(PDFFont.class.getName());
-  private static final L10N L = new L10N(PDFFont.class);
 
-  private int _id;
+    private static final Logger log = Logger.getLogger(PDFFont.class.getName());
+    private static final L10N L = new L10N(PDFFont.class);
+    private int _id;
+    private final Font _face;
+    private final String _encoding;
+    private final String _opt;
 
-  private final Font _face;
+    PDFFont(Font face, String encoding, String opt) {
+	_face = face;
+	_encoding = encoding;
+	_opt = opt;
+    }
 
-  private final String _encoding;
-  private final String _opt;
+    void setId(int id) {
+	_id = id;
+    }
 
-  PDFFont(Font face, String encoding, String opt)
-  {
-    _face = face;
-    _encoding = encoding;
-    _opt = opt;
-  }
+    public int getId() {
+	return _id;
+    }
 
-  void setId(int id)
-  {
-    _id = id;
-  }
+    public String getFontName() {
+	return _face.getFontName();
+    }
 
-  public int getId()
-  {
-    return _id;
-  }
+    public String getFontStyle() {
+	return _face.getWeight();
+    }
 
-  public String getFontName()
-  {
-    return _face.getFontName();
-  }
+    public double getAscender() {
+	return _face.getAscender();
+    }
 
-  public String getFontStyle()
-  {
-    return _face.getWeight();
-  }
+    public double getCapHeight() {
+	return _face.getCapHeight();
+    }
 
-  public double getAscender()
-  {
-    return _face.getAscender();
-  }
+    public double getDescender() {
+	return _face.getDescender();
+    }
 
-  public double getCapHeight()
-  {
-    return _face.getCapHeight();
-  }
+    public double stringWidth(String text) {
+	return _face.stringWidth(text);
+    }
 
-  public double getDescender()
-  {
-    return _face.getDescender();
-  }
+    public String getPDFName() {
+	return "F" + _id;
+    }
 
-  public double stringWidth(String text)
-  {
-    return _face.stringWidth(text);
-  }
+    String getResource() {
+	return ("/Font << /F" + _id + " " + _id + " 0 R>>");
+    }
 
-  public String getPDFName()
-  {
-    return "F" + _id;
-  }
+    public void writeObject(PDFWriter out)
+	    throws IOException {
+	out.println("<< /Type /Font");
+	out.println("   /Subtype /Type1");
+	out.println("   /Name /" + _face.getFontName());
+	out.println("   /BaseFont /Helvetica");
+	out.println("   /Encoding /MacRomanEncoding");
+	out.println(">>");
+    }
 
-  String getResource()
-  {
-    return("/Font << /F" + _id + " " + _id + " 0 R>>");
-  }
+    public int hashCode() {
+	int hash = 37;
 
-  public void writeObject(PDFWriter out)
-    throws IOException
-  {
-    out.println("<< /Type /Font");
-    out.println("   /Subtype /Type1");
-    out.println("   /Name /" + _face.getFontName());
-    out.println("   /BaseFont /Helvetica");
-    out.println("   /Encoding /MacRomanEncoding");
-    out.println(">>");
-  }
+	hash = 65521 * hash + _face.hashCode();
+	hash = 65521 * hash + _encoding.hashCode();
+	hash = 65521 * hash + _opt.hashCode();
 
-  public int hashCode()
-  {
-    int hash = 37;
+	return hash;
+    }
 
-    hash = 65521 * hash + _face.hashCode();
-    hash = 65521 * hash + _encoding.hashCode();
-    hash = 65521 * hash + _opt.hashCode();
+    public boolean equals(Object o) {
+	if (this == o) {
+	    return true;
+	} else if (!(o instanceof PDFFont)) {
+	    return false;
+	}
 
-    return hash;
-  }
+	PDFFont font = (PDFFont) o;
 
-  public boolean equals(Object o)
-  {
-    if (this == o)
-      return true;
-    else if (! (o instanceof PDFFont))
-      return false;
+	return (_face == font._face
+		&& _encoding.equals(font._encoding)
+		&& _opt.equals(font._opt));
+    }
 
-    PDFFont font = (PDFFont) o;
-
-    return (_face == font._face &&
-            _encoding.equals(font._encoding) &&
-            _opt.equals(font._opt));
-  }
-
-  public String toString()
-  {
-    return "PDFFont[" + _face.getFontName() + "," + _encoding + "," + _opt + "]";
-  }
+    public String toString() {
+	return "PDFFont[" + _face.getFontName() + "," + _encoding + "," + _opt + "]";
+    }
 }

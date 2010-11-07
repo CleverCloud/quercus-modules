@@ -26,7 +26,6 @@
  *
  * @author Scott Ferguson
  */
-
 package com.clevercloud.quercus.modules.pdflib;
 
 import com.caucho.util.L10N;
@@ -44,231 +43,217 @@ import java.io.IOException;
  * parses afm
  */
 public class AfmParser {
-  private static final L10N L = new L10N(AfmParser.class);
-  
-  private static final String END_OF_FILE = "end of file";
 
-  private ReadStream _is;
+    private static final L10N L = new L10N(AfmParser.class);
+    private static final String END_OF_FILE = "end of file";
+    private ReadStream _is;
 
-  /**
-   * Parses the AFM file.
-   * If the webInfLibPath is not null or empty and is the valid absolute path to this
-   * applications WEB-INF/lib folder (or any other folder containing jars to load),
-   * jars inside that folder are also searched for fonts.
-   */
-  public Font parse(String webInfLibPath, String name)
-    throws IOException
-  {
-    MergePath mergePath = new MergePath();
-    mergePath.addClassPath();
+    /**
+     * Parses the AFM file.
+     * If the webInfLibPath is not null or empty and is the valid absolute path to this
+     * applications WEB-INF/lib folder (or any other folder containing jars to load),
+     * jars inside that folder are also searched for fonts.
+     */
+    public Font parse(String webInfLibPath, String name)
+	    throws IOException {
+	MergePath mergePath = new MergePath();
+	mergePath.addClassPath();
 
-    File webInfLibFile = new File(webInfLibPath);
-    if(webInfLibPath != null && !webInfLibPath.isEmpty() && webInfLibFile.isDirectory())
-    {
-      Path webInfPath = Vfs.lookup(webInfLibFile.getAbsolutePath());
-      for( File f : webInfLibFile.listFiles())
-      {
-        /*
-        only look for files that are either jars or zips
-         */
-        if(f.isFile() && (f.getAbsolutePath().endsWith(".jar") || f.getAbsolutePath().endsWith(".zip")))
-        {
-          /*
-          get a path object with the Jar relative to WEB-INF/lib
-           */
-          Path jarPath = webInfPath.lookup(f.getName());
-          /*
-            Encapsulate it as a JarPath, else mergePath.lookup does not look
-            "into" the jar when looking for resources
-           */
-          mergePath.addMergePath(JarPath.create(jarPath));
-        }
-      }
+	File webInfLibFile = new File(webInfLibPath);
+	if (webInfLibPath != null && !webInfLibPath.isEmpty() && webInfLibFile.isDirectory()) {
+	    Path webInfPath = Vfs.lookup(webInfLibFile.getAbsolutePath());
+	    for (File f : webInfLibFile.listFiles()) {
+		/*
+		only look for files that are either jars or zips
+		 */
+		if (f.isFile() && (f.getAbsolutePath().endsWith(".jar") || f.getAbsolutePath().endsWith(".zip"))) {
+		    /*
+		    get a path object with the Jar relative to WEB-INF/lib
+		     */
+		    Path jarPath = webInfPath.lookup(f.getName());
+		    /*
+		    Encapsulate it as a JarPath, else mergePath.lookup does not look
+		    "into" the jar when looking for resources
+		     */
+		    mergePath.addMergePath(JarPath.create(jarPath));
+		}
+	    }
+	}
+
+	Path path = mergePath.lookup("com/clevercloud/quercus/modules/pdflib/font/" + name + ".afm");
+
+	if (!path.canRead()) {
+	    throw new FileNotFoundException(L.l("Can't find font {0}", name));
+	}
+
+	_is = path.openRead();
+
+	try {
+	    return parseTop();
+	} finally {
+	    _is.close();
+	}
     }
 
-    Path path = mergePath.lookup("com/clevercloud/quercus/modules/pdflib/font/" + name + ".afm");
+    private Font parseTop()
+	    throws IOException {
+	Font font = new Font();
 
-    if (! path.canRead())
-      throw new FileNotFoundException(L.l("Can't find font {0}", name));
+	while (skipWhitespace()) {
+	    String id = parseIdentifier();
 
-    _is = path.openRead();
+	    if ("FontName".equals(id)) {
+		font.setFontName(parseString());
+	    } else if ("Weight".equals(id)) {
+		font.setWeight(parseString());
+	    } else if ("FontBBox".equals(id)) {
+		font.setBBox(parseNumber(), parseNumber(),
+			parseNumber(), parseNumber());
+	    } else if ("CapHeight".equals(id)) {
+		font.setCapHeight(parseNumber());
+	    } else if ("XHeight".equals(id)) {
+		font.setXHeight(parseNumber());
+	    } else if ("Ascender".equals(id)) {
+		font.setAscender(parseNumber());
+	    } else if ("Descender".equals(id)) {
+		font.setDescender(parseNumber());
+	    } else if ("UnderlinePosition".equals(id)) {
+		font.setUnderlinePosition(parseNumber());
+	    } else if ("UnderlineThickness".equals(id)) {
+		font.setUnderlineThickness(parseNumber());
+	    } else if ("C".equals(id)) {
+		font.addChar(parseCharacter());
+	    }
 
-    try {
-      return parseTop();
-    } finally {
-      _is.close();
-    }
-  }
+	    skipToEndOfLine();
+	}
 
-  private Font parseTop()
-    throws IOException
-  {
-    Font font = new Font();
-
-    while (skipWhitespace()) {
-      String id = parseIdentifier();
-
-      if ("FontName".equals(id)) {
-        font.setFontName(parseString());
-      }
-      else if ("Weight".equals(id)) {
-        font.setWeight(parseString());
-      }
-      else if ("FontBBox".equals(id)) {
-        font.setBBox(parseNumber(), parseNumber(),
-                     parseNumber(), parseNumber());
-      }
-      else if ("CapHeight".equals(id)) {
-        font.setCapHeight(parseNumber());
-      }
-      else if ("XHeight".equals(id)) {
-        font.setXHeight(parseNumber());
-      }
-      else if ("Ascender".equals(id)) {
-        font.setAscender(parseNumber());
-      }
-      else if ("Descender".equals(id)) {
-        font.setDescender(parseNumber());
-      }
-      else if ("UnderlinePosition".equals(id)) {
-        font.setUnderlinePosition(parseNumber());
-      }
-      else if ("UnderlineThickness".equals(id)) {
-        font.setUnderlineThickness(parseNumber());
-      }
-      else if ("C".equals(id)) {
-        font.addChar(parseCharacter());
-      }
-
-      skipToEndOfLine();
+	return font;
     }
 
-    return font;
-  }
+    private FontChar parseCharacter()
+	    throws IOException {
+	int code = parseInteger();
 
-  private FontChar parseCharacter()
-    throws IOException
-  {
-    int code = parseInteger();
+	skipWhitespace();
 
-    skipWhitespace();
+	int ch;
 
-    int ch;
+	if ((ch = _is.read()) != ';') {
+	    throw new IOException("Expected ';'");
+	}
 
-    if ((ch = _is.read()) != ';')
-      throw new IOException("Expected ';'");
+	String wx = parseString();
 
-    String wx = parseString();
+	if (!"WX".equals(wx)) {
+	    throw new IOException("Expected 'WX'");
+	}
 
-    if (! "WX".equals(wx))
-      throw new IOException("Expected 'WX'");
+	double width = parseNumber();
 
-    double width = parseNumber();
-
-    return new FontChar(code, width);
-  }
-
-  private String parseString()
-    throws IOException
-  {
-    skipWhitespace();
-
-    StringBuilder sb = new StringBuilder();
-    int ch;
-
-    while ((ch = _is.read()) >= 0 && ! Character.isWhitespace(ch)) {
-      sb.append((char) ch);
+	return new FontChar(code, width);
     }
 
-    if (ch >= 0)
-      _is.unread();
+    private String parseString()
+	    throws IOException {
+	skipWhitespace();
 
-    return sb.toString();
-  }
+	StringBuilder sb = new StringBuilder();
+	int ch;
 
-  private int parseInteger()
-    throws IOException
-  {
-    skipWhitespace();
+	while ((ch = _is.read()) >= 0 && !Character.isWhitespace(ch)) {
+	    sb.append((char) ch);
+	}
 
-    int value = 0;
-    int sign = 1;
+	if (ch >= 0) {
+	    _is.unread();
+	}
 
-    int ch = _is.read();
-
-    if (ch == '-') {
-      sign = -1;
-      ch = _is.read();
+	return sb.toString();
     }
 
-    for (; '0' <= ch && ch <= '9'; ch = _is.read()) {
-      value = 10 * value + ch - '0';
+    private int parseInteger()
+	    throws IOException {
+	skipWhitespace();
+
+	int value = 0;
+	int sign = 1;
+
+	int ch = _is.read();
+
+	if (ch == '-') {
+	    sign = -1;
+	    ch = _is.read();
+	}
+
+	for (; '0' <= ch && ch <= '9'; ch = _is.read()) {
+	    value = 10 * value + ch - '0';
+	}
+
+	if (ch >= 0) {
+	    _is.unread();
+	}
+
+	return sign * value;
     }
 
-    if (ch >= 0)
-      _is.unread();
+    private double parseNumber()
+	    throws IOException {
+	skipWhitespace();
 
-    return sign * value;
-  }
+	StringBuilder sb = new StringBuilder();
+	int ch;
 
-  private double parseNumber()
-    throws IOException
-  {
-    skipWhitespace();
+	while ('0' <= (ch = _is.read()) && ch <= '9'
+		|| ch == '.' || ch == '-' || ch == '+') {
+	    sb.append((char) ch);
+	}
 
-    StringBuilder sb = new StringBuilder();
-    int ch;
+	if (ch >= 0) {
+	    _is.unread();
+	}
 
-    while ('0' <= (ch = _is.read()) && ch <= '9' ||
-           ch == '.' || ch == '-' || ch == '+') {
-      sb.append((char) ch);
+	if (sb.length() == 0) {
+	    return 0;
+	}
+
+	return Double.parseDouble(sb.toString());
     }
 
-    if (ch >= 0)
-      _is.unread();
+    private String parseIdentifier()
+	    throws IOException {
+	StringBuilder sb = new StringBuilder();
 
-    if (sb.length() == 0)
-      return 0;
+	int ch;
 
-    return Double.parseDouble(sb.toString());
-  }
+	while (Character.isLetterOrDigit((ch = _is.read()))) {
+	    sb.append((char) ch);
+	}
 
-  private String parseIdentifier()
-    throws IOException
-  {
-    StringBuilder sb = new StringBuilder();
+	_is.unread();
 
-    int ch;
-
-    while (Character.isLetterOrDigit((ch = _is.read()))) {
-      sb.append((char) ch);
+	return sb.toString();
     }
 
-    _is.unread();
+    private void skipToEndOfLine()
+	    throws IOException {
+	int ch;
 
-    return sb.toString();
-  }
-
-  private void skipToEndOfLine()
-    throws IOException
-  {
-    int ch;
-
-    while ((ch = _is.read()) >= 0 && ch != '\n') {
-    }
-  }
-
-  private boolean skipWhitespace()
-    throws IOException
-  {
-    int ch;
-
-    while ((ch = _is.read()) == ' ' || ch == '\t') {
+	while ((ch = _is.read()) >= 0 && ch != '\n') {
+	}
     }
 
-    if (ch >= 0)
-      _is.unread();
+    private boolean skipWhitespace()
+	    throws IOException {
+	int ch;
 
-    return ch >= 0;
-  }
+	while ((ch = _is.read()) == ' ' || ch == '\t') {
+	}
+
+	if (ch >= 0) {
+	    _is.unread();
+	}
+
+	return ch >= 0;
+    }
 }

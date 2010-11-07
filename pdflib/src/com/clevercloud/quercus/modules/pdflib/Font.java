@@ -26,163 +26,141 @@
  *
  * @author Scott Ferguson
  */
-
 package com.clevercloud.quercus.modules.pdflib;
 
 /**
  * font
  */
 public class Font {
-  private String _fontName;
-  private String _weight;
 
-  private double _llxBBox;
-  private double _llyBBox;
-  private double _urxBBox;
-  private double _uryBBox;
+    private String _fontName;
+    private String _weight;
+    private double _llxBBox;
+    private double _llyBBox;
+    private double _urxBBox;
+    private double _uryBBox;
+    private double _capHeight;
+    private double _xHeight;
+    private double _ascender;
+    private double _descender;
+    private double _underlinePosition;
+    private double _underlineThickness;
+    private double _italicAngle;
+    private FontChar[] _chars = new FontChar[256];
 
-  private double _capHeight;
-  private double _xHeight;
-  private double _ascender;
-  private double _descender;
-
-  private double _underlinePosition;
-  private double _underlineThickness;
-  private double _italicAngle;
-
-  private FontChar []_chars = new FontChar[256];
-
-  public String getFontName()
-  {
-    return _fontName;
-  }
-
-  void setFontName(String name)
-  {
-    _fontName = name;
-  }
-
-  public String getWeight()
-  {
-    return _weight;
-  }
-
-  void setWeight(String weight)
-  {
-    _weight = weight;
-  }
-
-  void setBBox(double llx, double lly, double urx, double ury)
-  {
-    _llxBBox = llx;
-    _llyBBox = lly;
-    _urxBBox = urx;
-    _uryBBox = ury;
-  }
-
-  public double getCapHeight()
-  {
-    return _capHeight;
-  }
-
-  void setCapHeight(double height)
-  {
-    _capHeight = height;
-  }
-
-  public double getXHeight()
-  {
-    return _xHeight;
-  }
-
-  void setXHeight(double height)
-  {
-    _xHeight = height;
-  }
-
-  public double getAscender()
-  {
-    return _ascender;
-  }
-
-  void setAscender(double ascender)
-  {
-    _ascender = ascender;
-  }
-
-  public double getDescender()
-  {
-    return _descender;
-  }
-
-  void setDescender(double descender)
-  {
-    _descender = descender;
-  }
-
-  public double getUnderlinePosition()
-  {
-    return _underlinePosition;
-  }
-
-  void setUnderlinePosition(double underlinePosition)
-  {
-    _underlinePosition = underlinePosition;
-  }
-
-  public double getUnderlineThickness()
-  {
-    return _underlineThickness;
-  }
-
-  void setUnderlineThickness(double underlineThickness)
-  {
-    _underlineThickness = underlineThickness;
-  }
-
-  public double getItalicAngle()
-  {
-    return _italicAngle;
-  }
-
-  void setItalicAngle(double italicAngle)
-  {
-    _italicAngle = italicAngle;
-  }
-
-  void addChar(FontChar fontChar)
-  {
-    int code = fontChar.getCode();
-
-    if (code >= 0 && code < _chars.length)
-      _chars[code] = fontChar;
-  }
-
-  public double stringWidth(String text)
-  {
-    double width = 0;
-
-    int len = text.length();
-    char prevChar = 0;
-
-    for (int i = 0; i < len; i++) {
-      char ch = text.charAt(i);
-
-      if (ch >= 256)
-        continue;
-
-      FontChar fontChar = _chars[ch];
-
-      if (fontChar == null)
-        continue;
-
-      width += fontChar.getWidth();
-
-      // XXX: kerning
-
-      prevChar = ch;
+    public String getFontName() {
+	return _fontName;
     }
 
-    return width;
-  }
+    void setFontName(String name) {
+	_fontName = name;
+    }
+
+    public String getWeight() {
+	return _weight;
+    }
+
+    void setWeight(String weight) {
+	_weight = weight;
+    }
+
+    void setBBox(double llx, double lly, double urx, double ury) {
+	_llxBBox = llx;
+	_llyBBox = lly;
+	_urxBBox = urx;
+	_uryBBox = ury;
+    }
+
+    public double getCapHeight() {
+	return _capHeight;
+    }
+
+    void setCapHeight(double height) {
+	_capHeight = height;
+    }
+
+    public double getXHeight() {
+	return _xHeight;
+    }
+
+    void setXHeight(double height) {
+	_xHeight = height;
+    }
+
+    public double getAscender() {
+	return _ascender;
+    }
+
+    void setAscender(double ascender) {
+	_ascender = ascender;
+    }
+
+    public double getDescender() {
+	return _descender;
+    }
+
+    void setDescender(double descender) {
+	_descender = descender;
+    }
+
+    public double getUnderlinePosition() {
+	return _underlinePosition;
+    }
+
+    void setUnderlinePosition(double underlinePosition) {
+	_underlinePosition = underlinePosition;
+    }
+
+    public double getUnderlineThickness() {
+	return _underlineThickness;
+    }
+
+    void setUnderlineThickness(double underlineThickness) {
+	_underlineThickness = underlineThickness;
+    }
+
+    public double getItalicAngle() {
+	return _italicAngle;
+    }
+
+    void setItalicAngle(double italicAngle) {
+	_italicAngle = italicAngle;
+    }
+
+    void addChar(FontChar fontChar) {
+	int code = fontChar.getCode();
+
+	if (code >= 0 && code < _chars.length) {
+	    _chars[code] = fontChar;
+	}
+    }
+
+    public double stringWidth(String text) {
+	double width = 0;
+
+	int len = text.length();
+	char prevChar = 0;
+
+	for (int i = 0; i < len; i++) {
+	    char ch = text.charAt(i);
+
+	    if (ch >= 256) {
+		continue;
+	    }
+
+	    FontChar fontChar = _chars[ch];
+
+	    if (fontChar == null) {
+		continue;
+	    }
+
+	    width += fontChar.getWidth();
+
+	    // XXX: kerning
+
+	    prevChar = ch;
+	}
+
+	return width;
+    }
 }

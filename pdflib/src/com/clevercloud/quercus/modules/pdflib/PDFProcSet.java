@@ -26,7 +26,6 @@
  *
  * @author Scott Ferguson
  */
-
 package com.clevercloud.quercus.modules.pdflib;
 
 /**
@@ -34,58 +33,53 @@ package com.clevercloud.quercus.modules.pdflib;
  */
 public class PDFProcSet {
 
-  private int _id;
-  private String _set = "";
+    private int _id;
+    private String _set = "";
 
-  PDFProcSet()
-  {
-  }
+    PDFProcSet() {
+    }
 
-  void setId(int id)
-  {
-    _id = id;
-  }
+    void setId(int id) {
+	_id = id;
+    }
 
-  public int getId()
-  {
-    return _id;
-  }
+    public int getId() {
+	return _id;
+    }
 
-  public void add(String proc)
-  {
-    if (_set.indexOf(proc) >= 0)
-      return;
+    public void add(String proc) {
+	if (_set.indexOf(proc) >= 0) {
+	    return;
+	}
 
-    if (_set.length() > 0)
-      _set = _set + ' ' + proc;
-    else
-      _set = proc;
-  }
+	if (_set.length() > 0) {
+	    _set = _set + ' ' + proc;
+	} else {
+	    _set = proc;
+	}
+    }
 
-  String getResource()
-  {
-    return ("/ProcSet [" + _set + "]");
-  }
+    String getResource() {
+	return ("/ProcSet [" + _set + "]");
+    }
 
-  public int hashCode()
-  {
-    return _set.hashCode();
-  }
+    public int hashCode() {
+	return _set.hashCode();
+    }
 
-  public boolean equals(Object o)
-  {
-    if (this == o)
-      return true;
-    else if (! (o instanceof PDFProcSet))
-      return false;
+    public boolean equals(Object o) {
+	if (this == o) {
+	    return true;
+	} else if (!(o instanceof PDFProcSet)) {
+	    return false;
+	}
 
-    PDFProcSet set = (PDFProcSet) o;
+	PDFProcSet set = (PDFProcSet) o;
 
-    return _set.equals(set._set);
-  }
+	return _set.equals(set._set);
+    }
 
-  public String toString()
-  {
-    return "PDFProcSet[" + _set + "]";
-  }
+    public String toString() {
+	return "PDFProcSet[" + _set + "]";
+    }
 }
