@@ -86,7 +86,7 @@ public class AfmParser {
       }
     }
 
-    Path path = mergePath.lookup("com/caucho/quercus/lib/pdf/font/" + name + ".afm");
+    Path path = mergePath.lookup("com/clevercloud/quercus/modules/pdflib/font/" + name + ".afm");
 
     if (! path.canRead())
       throw new FileNotFoundException(L.l("Can't find font {0}", name));
