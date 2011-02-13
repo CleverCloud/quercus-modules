@@ -128,13 +128,20 @@
 	</jar>
     </target>
 
-    <target name="all" depends="pdflib"></target>
+    <target name="all" depends="pdflib,apc"></target>
 
     <target name="pdflib" depends="init">
 	<antcall target="module" inheritRefs="true">
 	    <param name="module.name" value="pdflib"/>
 	    <param name="module.dist" value="${lib}"/>
 	</antcall>
+    </target>
+
+    <target name="apc" depends="init">
+        <antcall target="module" inheritRefs="true">
+            <param name="module.name" value="apc"/>
+            <param name="module.dist" value="${lib}"/>
+        </antcall>
     </target>
 
     <target name="clean" depends="init">
