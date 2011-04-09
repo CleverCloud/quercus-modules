@@ -2,5 +2,6 @@
 dist/
 classes/
 /lib/
+build/
 /ext/*
 !/ext/.gitignore
