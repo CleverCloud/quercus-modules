@@ -1,0 +1,7 @@
+[submodule "apc"]
+        path = apc
+        url = git@github.com:CleverCloud/quercus-apc.git
+[submodule "pdflib"]
+        path = pdflib
+        url = git@github.com:CleverCloud/quercus-pdflib.git
+
