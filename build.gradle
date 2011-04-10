@@ -1,0 +1,14 @@
+dependsOnChildren()
+
+allprojects {
+    apply plugin: 'java'
+}
+
+subprojects {
+    repositories {
+        mavenRepo urls: "http://download.java.net/maven/2/"
+    }
+    dependencies {
+	compile fileTree(dir: 'libs', include: '*.jar')
+    }
+}
